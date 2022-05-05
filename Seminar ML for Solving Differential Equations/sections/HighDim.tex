@@ -1,0 +1,22 @@
+\section{High-dimensional Approaches}
+\label{sec:highdim}
+In some spheres of physics, finance, chemistry it is required to solve PDEs, which number of dimensions can exceed conventional three dimensions and can reach e.g. 100 or more. These problems have to be considered separately, since they suffer from the curse of dimensionality. 
+
+The curse of dimensionality is a group of problems that occur only in high-dimensional spaces. For example, concentration of norms and distances, instability of neighborhood, changing behavior in distribution of data, empty space phenomenon, etc. When the dimensionality increases in PDEs, computational cost for solving them grows exponentially~\cite{bellman}. 
+
+Both numerical and machine learning approaches become infeasible in high-dimensional spaces e.g. due to the exploding number of grid points in FDM or an exponential growth of the complexity of non-linear regression models. But the combination of them can be a key toward an effective and accurate solver. 
+
+\subsection{Reformulation as Backward Stochastic Differential Equations}
+In order to use the power of deep learning, Han et al.~\cite{Han18, Weinan17} propose a deep BSDE solver, where PDEs is reformulated as Backward Stochastic Differential Equations (BSDEs) and then solved with reinforcement learning (RL). 
+
+The method contains three steps. Firstly, a concrete PDE is reformulated as BSDE using Feyman-Kac formula that is used by solving linear parabolic PDEs numerically with Monte Carlo method. Since the BSDE is similar to stochastic control problem, model-based RL is applied to this with a gradient of solutions as a policy function. Finally, the policy function is approximated with DNN as performed in RL. The architecture of the applied DNN contains four fully-connected layers and depends on the dimensionality, but not on the type of solving PDE. Furthermore, the increasing of number of hidden layers enhances accuracy of the solver, but affects computational cost negatively. The optimal number is chosen experimentally. Batch Normalization and Adam optimizer are used.  
+
+Tested on Black--Scholes, Hamilton--Jacobi and Allen--Cahn PDEs with up to 100 dimensions, the method achieves successful results in terms of accuracy and computational cost. Therefore, while numerical methods fail due to the curse of dimensionality, the proposed algorithm effectively includes more dependencies into equations to receive more precise results e.g. considering more economic agents, instead of using less representative agents in Black--Scholes PDE. However, the method is restricted to the class of non-linear parabolic PDEs and requires an ad hoc reformulation for each type of PDE.     
+
+\subsection{Deep Galerkin Method}
+Since meshes become infeasible in high-dimensional spaces, Sirignano et al.~\cite{Sirignano18} propose a first completely mesh-free algorithm for solving high-\\dimensional PDEs, called Deep Galerkin Method. 
+
+Galerkin method is a numerical method that searches for a linear combination of basis functions to find the solution for a underlying PDE. Instead of a linear combination of basis function, Deep Galerkin Method approximates solutions using DNN completely mesh-free. The proposed method consists of 4 steps. First, random spatial points with fixed probability density are sampled. This allows to avoid forming a mesh. Second, squared error at these points is computed after the executing on DNN. Third, the gradients are backpropagated through DNN after taking a learning step with a fixed learning rate. Fourth, the method is repeated until the convergence. The applied DNN employs LSTM architecture with Xavier initialization. For the training L2-regularization and Adam optimizer are used. 
+
+The method is evaluated on free-boundary pricing American options, Hamilton--Jacobi and Burgers PDEs. This achieves the accurate results with up to 200 dimensions. Although the proposed method is applied to quasi-linear parabolic PDEs, it can be extended to elliptic and hyperbolic ones. However, the performance for these types of PDE is not investigated. The authors prove the theoretical convergence of DNN to PDE solutions only for quasi-linear equations and not for the whole non-linear class of PDEs.
+
